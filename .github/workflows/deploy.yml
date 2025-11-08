@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup SSH key
-        uses: webfactory/ssh-agent@v0.8.1
+        uses: webfactory/ssh-agent@v0.8
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
@@ -28,11 +28,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
             echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
             docker pull $DOCKERHUB_USERNAME/demo-app:latest
-            # Stop and remove old container if running
             if [ $(docker ps -q -f name=demo-app) ]; then
               docker stop demo-app
               docker rm demo-app
             fi
-            # Run new container
-            docker run -d --name demo-app -p 80:3000 $DOCKERHUB_USERNAME/demo-app:latest
+            docker run -d --name demo-app -p 80:3000 --restart always $DOCKERHUB_USERNAME/demo-app:latest
           EOF
