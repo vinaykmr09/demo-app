@@ -34,5 +34,5 @@ jobs:
 
       - name: Build and Push Docker image
         run: |
-          docker build -t $DOCKERHUB_USERNAME/demo-app:latest .
-          docker push $DOCKERHUB_USERNAME/demo-app:latest
+          docker build -t $DOCKERHUB_USERNAME/demo-app:v1 .
+          docker push $DOCKERHUB_USERNAME/demo-app:v1

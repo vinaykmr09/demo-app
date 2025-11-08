@@ -33,7 +33,7 @@ jobs:
             echo "$DOCKERHUB_TOKEN" | sudo docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
             # Pull the latest Docker image
-            sudo docker pull $DOCKERHUB_USERNAME/demo-app:latest
+            sudo docker pull $DOCKERHUB_USERNAME/demo-app:v1
 
             # Stop and remove old container if it exists
             if [ \$(sudo docker ps -q -f name=demo-app) ]; then
@@ -42,5 +42,5 @@ jobs:
             fi
 
             # Run new container on port 80 (host) -> 3000 (container)
-            sudo docker run -d --name demo-app -p 80:3000 --restart always $DOCKERHUB_USERNAME/demo-app:latest
+            sudo docker run -d --name demo-app -p 80:3000 --restart always $DOCKERHUB_USERNAME/demo-app:vi
           EOF
