@@ -1,0 +1,38 @@
+name: Deploy Docker to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Deploy Docker container on EC2
+        env:
+          EC2_USER: ubuntu               # or ec2-user
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker pull $DOCKERHUB_USERNAME/demo-app:latest
+            # Stop and remove old container if running
+            if [ $(docker ps -q -f name=demo-app) ]; then
+              docker stop demo-app
+              docker rm demo-app
+            fi
+            # Run new container
+            docker run -d --name demo-app -p 80:3000 $DOCKERHUB_USERNAME/demo-app:latest
+          EOF
